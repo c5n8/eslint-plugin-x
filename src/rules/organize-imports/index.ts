@@ -101,24 +101,11 @@ export default createRule({
         return
       }
 
-      const sortedDeclarations = importDeclarations.toSorted((a, b) => {
-        const aa = a.specifiers[0]?.local.name
-        const bb = b.specifiers[0]?.local.name
-
-        if (aa == null && bb == null) {
-          return 0
-        }
-
-        if (aa == null) {
-          return -1
-        }
-
-        if (bb == null) {
-          return 1
-        }
-
-        return aa.localeCompare(bb)
-      })
+      const sortedDeclarations = importDeclarations.toSorted((a, b) =>
+        (a.specifiers[0]?.local.name ?? '').localeCompare(
+          b.specifiers[0]?.local.name ?? '',
+        ),
+      )
 
       const firstOutOfSortDeclaration = sortedDeclarations.find(
         (declaration, index) => declaration !== importDeclarations[index],
