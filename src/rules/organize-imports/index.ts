@@ -124,7 +124,7 @@ export default createRule({
               const comments = sourceCode.getCommentsBefore(declaration)
 
               const preserveLeadingComments = (() => {
-                const lastComment = comments[comments.length - 1]
+                const lastComment = comments.at(-1)
 
                 if (lastComment == null) {
                   return true
@@ -145,8 +145,7 @@ export default createRule({
             .join('\n')
 
           const start = importDeclarations[0]?.range[0]
-          const end =
-            importDeclarations[importDeclarations.length - 1]?.range[1]
+          const end = importDeclarations.at(-1)?.range[1]
 
           return fixer.replaceTextRange(
             [
