@@ -1,6 +1,18 @@
+import { AST_NODE_TYPES } from '@typescript-eslint/utils'
 import { createRule } from '#package/utils/create-rule.js'
 
-export default createRule({
+type MessageIds = 'avoidMultipleSpecifiersImports' | 'avoidUnsortedImports'
+
+type Options = [
+  {
+    ignorePaths?: {
+      name: string
+      importNames?: string[]
+    }[]
+  },
+]
+
+export default createRule<Options, MessageIds>({
   name: 'organize-imports',
   meta: {
     type: 'suggestion',
@@ -14,10 +26,32 @@ export default createRule({
       avoidUnsortedImports:
         'Import declarations should be sorted by the specifier.',
     },
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          ignorePaths: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                importNames: {
+                  type: 'array',
+                  items: { type: 'string' },
+                },
+              },
+              required: ['name'],
+              additionalProperties: false,
+            },
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
   },
-  defaultOptions: [],
-  create: (context) => ({
+  defaultOptions: [{ ignorePaths: [] }],
+  create: (context, [{ ignorePaths = [] }]) => ({
     Program: (program) => {
       const sourceCode = context.sourceCode
       const importDeclarations = program.body
@@ -101,14 +135,37 @@ export default createRule({
         return
       }
 
-      const sortedDeclarations = importDeclarations.toSorted((a, b) =>
+      const selectedDeclarations = importDeclarations.filter((declaration) => {
+        return ignorePaths.every(
+          (path) =>
+            path.name !== declaration.source.value &&
+            path.importNames?.every((name) =>
+              name === 'default'
+                ? declaration.specifiers.every(
+                    (specifier) =>
+                      specifier.type !== AST_NODE_TYPES.ImportDefaultSpecifier,
+                  )
+                : declaration.specifiers.every(
+                    (specifier) =>
+                      !(
+                        specifier.type === AST_NODE_TYPES.ImportSpecifier &&
+                        (specifier.imported.type === AST_NODE_TYPES.Identifier
+                          ? specifier.imported.name
+                          : specifier.imported.value) === name
+                      ),
+                  ),
+            ),
+        )
+      })
+
+      const sortedDeclarations = selectedDeclarations.toSorted((a, b) =>
         (a.specifiers[0]?.local.name ?? '').localeCompare(
           b.specifiers[0]?.local.name ?? '',
         ),
       )
 
       const firstOutOfSortDeclaration = sortedDeclarations.find(
-        (declaration, index) => declaration !== importDeclarations[index],
+        (declaration, index) => declaration !== selectedDeclarations[index],
       )
 
       if (firstOutOfSortDeclaration == null) {
@@ -146,8 +203,8 @@ export default createRule({
 
           /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
           /* eslint-disable @typescript-eslint/no-non-null-assertion */
-          const start = importDeclarations[0]?.range[0]!
-          const end = importDeclarations.at(-1)?.range[1]!
+          const start = selectedDeclarations[0]?.range[0]!
+          const end = selectedDeclarations.at(-1)?.range[1]!
           /* eslint-enable */
 
           return fixer.replaceTextRange([start, end], fix)
