@@ -144,16 +144,13 @@ export default createRule({
             })
             .join('\n')
 
-          const start = importDeclarations[0]?.range[0]
-          const end = importDeclarations.at(-1)?.range[1]
+          /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
+          /* eslint-disable @typescript-eslint/no-non-null-assertion */
+          const start = importDeclarations[0]?.range[0]!
+          const end = importDeclarations.at(-1)?.range[1]!
+          /* eslint-enable */
 
-          return fixer.replaceTextRange(
-            [
-              start as NonNullable<typeof start>,
-              end as NonNullable<typeof end>,
-            ],
-            fix,
-          )
+          return fixer.replaceTextRange([start, end], fix)
         },
       })
     },
