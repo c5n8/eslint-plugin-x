@@ -1,5 +1,6 @@
 .devcontainer/
 .vscode/
+.ignore
 
 dist/
 node_modules/
