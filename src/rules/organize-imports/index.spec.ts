@@ -54,6 +54,18 @@ ruleTester.run('organize-imports', rule, {
       errors: [{ messageId: 'avoidUnsortedImports' }],
       code: ts`
         import { b } from 'module'
+        import { a } from 'module'
+      `,
+      output: ts`
+        import { a } from 'module'
+        import { b } from 'module'
+      `,
+    },
+
+    {
+      errors: [{ messageId: 'avoidUnsortedImports' }],
+      code: ts`
+        import { b } from 'module'
         // comment
         import { a } from 'module'
       `,
@@ -72,6 +84,22 @@ ruleTester.run('organize-imports', rule, {
         `,
       output: ts`
         import { c as a } from 'module'
+        import { b } from 'module'
+      `,
+    },
+
+    {
+      errors: [{ messageId: 'avoidUnsortedImports' }],
+      code: ts`
+        import 'module'
+        foo()
+        import { b } from 'module'
+        import { a } from 'module'
+        `,
+      output: ts`
+        import 'module'
+        foo()
+        import { a } from 'module'
         import { b } from 'module'
       `,
     },

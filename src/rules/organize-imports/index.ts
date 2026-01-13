@@ -20,9 +20,9 @@ export default createRule({
   create: (context) => ({
     Program: (program) => {
       const sourceCode = context.sourceCode
-      const importDeclarations = program.body.filter(
-        (declaration) => declaration.type === 'ImportDeclaration',
-      )
+      const importDeclarations = program.body
+        .filter((declaration) => declaration.type === 'ImportDeclaration')
+        .filter((declaration) => declaration.specifiers.length > 0)
 
       if (importDeclarations.length === 0) {
         return
