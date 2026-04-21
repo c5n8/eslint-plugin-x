@@ -137,5 +137,22 @@ ruleTester.run('organize-imports', rule, {
         import { b } from 'module'
       `,
     },
+
+    {
+      options: [{ ignorePaths: [{ importNames: ['*'], name: 'bar' }] }],
+      errors: [{ messageId: 'avoidUnsortedImports' }],
+      code: ts`
+        import * as foo from 'bar'
+        foo()
+        import { b } from 'module'
+        import { a } from 'module'
+        `,
+      output: ts`
+        import * as foo from 'bar'
+        foo()
+        import { a } from 'module'
+        import { b } from 'module'
+      `,
+    },
   ],
 })
