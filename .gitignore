@@ -1,11 +1,20 @@
-.devcontainer/
-.vscode/
-.ignore
+/*
 
-dist/
-node_modules/
-coverage/
+!/src/
 
-compose.override.yaml
+!/.npmignore
+!/.node-version
 
-core.*
+!/.editorconfig
+!/.prettierignore
+!/dictionary.txt
+
+!/README.md
+
+!/*.yaml
+!/*.js
+!/*.json
+!/*.ts
+
+!/.gitatributes
+!/.gitignore
